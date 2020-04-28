@@ -1,0 +1,120 @@
+---
+title: "Basic inferential data analysis"
+author: "Georgy Makarov"
+date: "April 24, 2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+## Overview
+
+This is the part two of the course project of Statistical Inference course. Here 
+we use confidence intervals and hypothesis tests to compare tooth growth by 
+supplement and dose from the *ToothGrowth* data. There are supporting plots in 
+appendix to this project.
+
+## Summary of the data
+
+ToothGrowth dataset shows the length of cells responsible for tooth growth in 60 observations. There are three features in the dataset: *len* stands for the tooth 
+length; *supp* is a factor with supplement *VC* or *OJ*; *dose* shows the dose
+of the supplement received.
+
+```{r}
+data("ToothGrowth")
+summary(ToothGrowth)
+```
+
+*Dose* feature has three levels: 0.5, 1.0, 2.0. Therefore we consider it a
+factor variable.
+
+```{r}
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+unique(ToothGrowth$dose)
+```
+
+The distribution of the tooth length is slightly skewed to the left, as the
+mean is lower than the median. The histogram of the tooth length is in appendix
+in *Figure 1*.
+
+While the dose is 2.0 mg there is no difference in the impact of delivery method
+on the tooth growth. When the dose is either 0.5 or 1.0 mg the orange juice is 
+more effective for the tooth growth. Visualization of this idea is given in 
+appendix in *Figure 2*.
+
+## Hypothesis testing
+
+We test three hypothesis. First hypothesis: tooth growth does not depend on 
+application method. Second hypothesis: tooth growth depends on application method
+when the dose is small. Third hypothesis: tooth growth does not depend on the
+dose of vitamin C. These hypothesis appear through $H_0$ notation:
+
+1. H~0~: OJ and VC means are the same;  
+2. H~0~: OJ and VC means are the same when dose is lower than 2;  
+3. H~0~: 0.5 and 2.0 doses means are the same.
+
+### Hypothesis 1
+
+```{r}
+t.test(len ~ supp, data = ToothGrowth)
+```
+
+P-value is **0.06** and it is greater than 0.05. Confidence interval includes 0. 
+There is no evidence to reject $H_0$ - application methods do not impact tooth
+growth.
+
+### Hypothesis 2
+
+```{r}
+t.test(len ~ supp, data = ToothGrowth[ToothGrowth$dose %in% c(0.5, 1.0),])
+```
+
+P-value is **0.004**, which is less than 0.05. Confidence interval does not 
+contain 0. There is evidence enough to reject $H_0$ - application methods impact 
+tooth growth when the dose is less than 2.0 mg.
+
+### Hypothesis 3
+
+```{r}
+t.test(len ~ dose, data = ToothGrowth[ToothGrowth$dose %in% c(0.5, 2),])
+```
+
+P-value is **4.4e-14**. which is less than 0.05. Confidence interval does not 
+contain 0. There is evidence enough to reject $H_0$ - the dose impacts on tooth 
+growth.
+
+## Conclusions
+
+This analysis assumed that each subject was randomly assigned and it was a 
+representative of the population. It is also based on the assumption that all
+observations are independent. The analysis shows that the tooth growth depends 
+on the dose of vitamin C. While the method of application is critical when the 
+dose is below 2.0 mg, it does not imply any difference on tooth growth when 
+the dose icreases.
+
+## Appendix
+
+```{r, echo=FALSE,  out.width='75%', out.height='75%'}
+hist(ToothGrowth$len, breaks = 5, xlim = c(0, 35), main = "Tooth growth",
+     col = "skyblue", xlab = "Tooth length")
+```
+
+Figure 1. Distribution of tooth length
+
+```{r, echo=FALSE,  out.width='75%', out.height='75%'}
+boxplot(len ~ supp*dose, data = ToothGrowth, col = (c("gold", "skyblue")), 
+        xlab = "Supplement and growth", main = "Tooth growth", ylab = "Length")
+```
+
+Figure 2. Tooth growth vs supplement & dose
+
+
+
+
+
+
+
